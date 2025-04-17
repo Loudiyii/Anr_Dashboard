@@ -12,7 +12,7 @@ st.title("📊 Tableau de bord des projets financés par l'ANR")
 @st.cache_data
 
 def load_data():
-    df = pd.read_excel("C:\\Users\\abder\\Downloads\\Stage\\base1504202025.xlsx")
+    df = pd.read_excel("base1504202025.xlsx")
 
     return df
 
