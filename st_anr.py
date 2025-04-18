@@ -13,7 +13,7 @@ st.title("📊 Tableau de bord des projets financés par l'ANR")
 def load_data():
     df = pd.read_excel("base18042025.xlsx")
 
-    # 🔐 Patch anti-pyarrow : convertir toutes les colonnes objets en str
+     # 🔐 Patch anti-pyarrow : convertir toutes les colonnes objets en str
     obj_cols = df.select_dtypes(include="object").columns
     df[obj_cols] = df[obj_cols].astype(str)
 
@@ -31,7 +31,7 @@ st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Réinitialiser les filtres"):
     st.rerun()
 
-# Filtres
+# Filtrage dynamique
 filtered_reference = df.copy()
 
 st.sidebar.header("🎯 Filtres")
@@ -63,44 +63,34 @@ instrument = st.sidebar.multiselect("Instrument de financement", sorted(filtered
 if instrument:
     filtered_reference = filtered_reference[filtered_reference["instrument_financement"].isin(instrument)]
 
-# 📊 Slider de filtre : nombre minimal de partenaires
-st.sidebar.markdown("### 🔧 Nombre minimal de partenaires")
-X = st.sidebar.slider("Nombre de partenaires minimum :", min_value=1, max_value=10, value=1)
+# Appliquer les filtres
+filtered_df = filtered_reference.copy()
 
-# Groupement par projet pour calculer nb_partenaire
-projets_groupes = filtered_reference.groupby("code_projet_anr").agg(
+# Statistiques sur les partenaires
+projets_groupes = filtered_df.groupby("code_projet_anr").agg(
     nb_partenaire=("code_partenaire_anr", "nunique"),
     financement_unique=("aide_allouee_projet_keuros", "first")
-).reset_index()
-
-# Filtrer les projets selon le nombre de partenaires
-projets_filtrés = projets_groupes[projets_groupes["nb_partenaire"] >= X]["code_projet_anr"]
-filtered_df = filtered_reference[filtered_reference["code_projet_anr"].isin(projets_filtrés)]
-projets_groupes = projets_groupes[projets_groupes["code_projet_anr"].isin(projets_filtrés)]
-
-# Gestion du cas où il n’y a aucun résultat
-if filtered_df.empty:
-    st.warning("⚠️ Aucun projet ne correspond aux filtres sélectionnés.")
-    st.stop()
-
-# KPIs et stats
-nb_projets = projets_groupes.shape[0]
+)
 moyenne_partenaire = projets_groupes["nb_partenaire"].mean()
+nb_projets = projets_groupes.shape[0]
 projet_max = projets_groupes["nb_partenaire"].idxmax()
 nb_max = projets_groupes["nb_partenaire"].max()
+# 📌 Proportion interactive des projets avec plus de X partenaires
+# 📌 Proportion interactive des projets avec au moins X partenaires
+st.subheader("📊 Répartition des projets par nombre de partenaires")
+
+X = st.slider("Sélectionner un seuil minimal de partenaires :", min_value=1, max_value=10, value=3)
+
+nb_au_moins_X = projets_groupes[projets_groupes["nb_partenaire"] >= X].shape[0]
+pourcentage_au_moins_X = (nb_au_moins_X / nb_projets) * 100
+
+st.markdown(f"📊 **{pourcentage_au_moins_X:.1f}%** des projets ont **au moins {X} partenaires**.")
 
 # Projet max/min financement
 max_funding = projets_groupes["financement_unique"].idxmax()
 min_funding = projets_groupes["financement_unique"].idxmin()
 max_funding_amount = projets_groupes["financement_unique"].max()
 min_funding_amount = projets_groupes["financement_unique"].min()
-
-# Résumé interactif
-nb_au_moins_X = nb_projets
-pourcentage_au_moins_X = (nb_au_moins_X / nb_projets) * 100  # forcément 100% car on a déjà filtré
-
-st.subheader("📊 Répartition des projets par nombre de partenaires")    
-st.markdown(f"📊 **{pourcentage_au_moins_X:.1f}%** des projets ont **au moins {X} partenaires**.")
 
 # KPIs
 st.subheader("🔢 Statistiques descriptives")
