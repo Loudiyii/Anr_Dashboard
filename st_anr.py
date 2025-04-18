@@ -7,6 +7,7 @@ from io import BytesIO
 
 st.set_page_config(layout="wide")
 st.title("📊 Tableau de bord des projets financés par l'ANR")
+st.info("⏳ L'application peut prendre **2 à 3 minutes** à charger les données.\n\nMerci de patienter quelques instants le temps que tout se charge correctement 🙏")
 
 # Chargement des données
 @st.cache_data
