@@ -121,7 +121,7 @@ if "instrument_financement" in filtered_df.columns:
     fig_inst = px.pie(pie_inst, names="Instrument", values="Nombre", title="Instruments de financement")
     st.plotly_chart(fig_inst, use_container_width=True)
 
-#st.subheader("🗺️ Répartition géographique (si géolocalisation disponible)")
+st.subheader("🗺️ Répartition géographique (si géolocalisation disponible)")
 if "geolocalisation" in filtered_df.columns:
     geo_df = filtered_df.drop_duplicates(subset="code_projet_anr").dropna(subset=['geolocalisation'])
     geo_df[['lat', 'lon']] = geo_df['geolocalisation'].str.extract(r'\((.*), (.*)\)').astype(float)
