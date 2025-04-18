@@ -147,4 +147,4 @@ if "instrument_financement" in filtered_df.columns:
 
 # 📋 Tableau des projets filtrés
 st.subheader("📋 Données filtrées")
-st.dataframe(filtered_df.drop_duplicates(subset="code_projet_anr"))
+st.dataframe(filtered_df)
