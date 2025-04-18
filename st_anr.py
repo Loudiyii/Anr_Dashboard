@@ -75,6 +75,16 @@ moyenne_partenaire = projets_groupes["nb_partenaire"].mean()
 nb_projets = projets_groupes.shape[0]
 projet_max = projets_groupes["nb_partenaire"].idxmax()
 nb_max = projets_groupes["nb_partenaire"].max()
+# 📌 Proportion interactive des projets avec plus de X partenaires
+# 📌 Proportion interactive des projets avec au moins X partenaires
+st.subheader("📊 Répartition des projets par nombre de partenaires")
+
+X = st.slider("Sélectionner un seuil minimal de partenaires :", min_value=1, max_value=10, value=3)
+
+nb_au_moins_X = projets_groupes[projets_groupes["nb_partenaire"] >= X].shape[0]
+pourcentage_au_moins_X = (nb_au_moins_X / nb_projets) * 100
+
+st.markdown(f"📊 **{pourcentage_au_moins_X:.1f}%** des projets ont **au moins {X} partenaires**.")
 
 # Projet max/min financement
 max_funding = projets_groupes["financement_unique"].idxmax()
