@@ -10,9 +10,12 @@ st.title("📊 Tableau de bord des projets financés par l'ANR")
 
 # Chargement des données
 @st.cache_data
-
 def load_data():
-    df = pd.read_excel("C:\\Users\\abder\\Downloads\\Stage\\base1504202025.xlsx")
+    df = pd.read_excel("base1504202025.xlsx")
+
+     # 🔐 Patch anti-pyarrow : convertir toutes les colonnes objets en str
+    obj_cols = df.select_dtypes(include="object").columns
+    df[obj_cols] = df[obj_cols].astype(str)
 
     return df
 
@@ -121,22 +124,6 @@ if "instrument_financement" in filtered_df.columns:
     fig_inst = px.pie(pie_inst, names="Instrument", values="Nombre", title="Instruments de financement")
     st.plotly_chart(fig_inst, use_container_width=True)
 
-# Carte
-st.subheader("🗺️ Répartition géographique (si géolocalisation disponible)")
-if "geolocalisation" in filtered_df.columns:
-    geo_df = filtered_df.drop_duplicates(subset="code_projet_anr").dropna(subset=['geolocalisation'])
-    geo_df[['lat', 'lon']] = geo_df['geolocalisation'].str.extract(r'\((.*), (.*)\)').astype(float)
-    fig3 = px.scatter_mapbox(geo_df, lat="lat", lon="lon", hover_name="nom_tutelle_gestionnaire", zoom=5,
-                              color="aide_allouee_projet_keuros", size_max=15,
-                              mapbox_style="open-street-map", height=500)
-    st.plotly_chart(fig3, use_container_width=True)
-
 # Tableau
 st.subheader("📋 Données filtrées")
 st.dataframe(filtered_df.drop_duplicates(subset="code_projet_anr"))
-
-# Export Excel
-st.subheader("📤 Exporter les données filtrées")
-output = BytesIO()
-filtered_df.drop_duplicates(subset="code_projet_anr").to_excel(output, index=False, engine='openpyxl')
-st.download_button("📥 Télécharger en Excel", data=output.getvalue(), file_name="projets_anr_filtrés.xlsx")
