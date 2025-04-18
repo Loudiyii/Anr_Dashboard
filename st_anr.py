@@ -85,8 +85,10 @@ if filtered_df.empty:
     st.warning("⚠️ Aucun projet ne correspond aux filtres sélectionnés.")
     st.stop()
 
-# KPIs
+# KPIs  
 nb_projets = projets_groupes.shape[0]
+total_projets = projets_groupes_base.shape[0]
+nb_projets_pourcent= (nb_projets / total_projets) * 100
 moyenne_partenaire = projets_groupes["nb_partenaire"].mean()
 projet_max = projets_groupes.loc[projets_groupes["nb_partenaire"].idxmax(), "code_projet_anr"]
 nb_max = projets_groupes["nb_partenaire"].max()
@@ -99,7 +101,7 @@ max_funding_amount = projets_groupes["financement_unique"].max()
 min_funding_amount = projets_groupes["financement_unique"].min()
 
 # Résumé avec le slider
-st.markdown(f"📊 **{nb_projets}** projets ont **au moins {X} partenaires**.")
+st.markdown(f"📊 **{nb_projets_pourcent:.2f}%** des projets ont **au moins {X} partenaires**.")
 
 # 🔢 Statistiques
 st.subheader("🔢 Statistiques descriptives")
