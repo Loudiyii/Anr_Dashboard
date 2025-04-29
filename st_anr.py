@@ -6,7 +6,7 @@ import plotly.express as px
 from io import BytesIO
 
 st.set_page_config(layout="wide")
-st.title("📊 Tableau de bord des projets financés par l'ANR")
+st.title("📊 Tableau de bord des projets financés par l'ANR 2014-2024")
 st.caption("⚠️ L’application peut prendre 2 à 3 minutes à charger. Merci de patienter 🙏")
 
 # Chargement des données
