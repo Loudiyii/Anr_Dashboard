@@ -22,7 +22,7 @@ def load_data(source):
     if source == "📘 ANR Global":
         df = pd.read_excel("base18042025.xlsx")
     else:
-        df = pd.read_excel("ANR_projets_communs.xlsx)  # Remplace par le vrai nom
+        df = pd.read_excel("ANR_projets_communs.xlsx")  # Remplace par le vrai nom
 
     # 🔐 Patch anti-pyarrow : convertir toutes les colonnes objets en str
     obj_cols = df.select_dtypes(include="object").columns
