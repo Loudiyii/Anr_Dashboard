@@ -21,13 +21,10 @@ def load_data(source):
     if source == "📘 ANR Global":
         df = pd.read_excel("base18042025.xlsx")
     else:
-        df = pd.read_excel("ANR_projets_communs.xlsx")  # Remplace par le vrai nom
+        df = pd.read_excel("ANR_projets_communs.xlsx")
     df.columns = df.columns.str.strip().str.lower()
-
-    # 🔐 Patch conversion string
     obj_cols = df.select_dtypes(include="object").columns
     df[obj_cols] = df[obj_cols].astype(str)
-
     return df
 
 with st.spinner("⚠️ L’application peut prendre 2 à 3 minutes à charger. Merci de patienter 🙏"):
@@ -41,7 +38,7 @@ for col in num_cols:
     if col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-# ♻️ Bouton pour réinitialiser les filtres
+# 🔄 Réinitialisation
 st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Réinitialiser les filtres"):
     st.rerun()
@@ -157,46 +154,44 @@ if "code_projet_anr" in filtered_reference.columns and "code_partenaire_anr" in 
         pie_inst.columns = ["Instrument", "Nombre"]
         fig_inst = px.pie(pie_inst, names="Instrument", values="Nombre", title="Instruments de financement")
         st.plotly_chart(fig_inst, use_container_width=True)
-st.subheader("🗺️ Carte des projets par département (tutelle gestionnaire)")
 
-if "libelle_de_departement_tutelle_gestionnaire" in filtered_df.columns:
-    # Compter les projets par département
-    dept_counts = filtered_df["libelle_de_departement_tutelle_gestionnaire"].value_counts().reset_index()
-    dept_counts.columns = ["departement", "nb_projets"]
+    # 🗺️ Carte géographique
+    st.subheader("🗺️ Carte des projets par département (tutelle gestionnaire)")
 
-    # Géocoder les départements
-    geolocator = Nominatim(user_agent="anr_dashboard_v1")
+    if "libelle_de_departement_tutelle_gestionnaire" in filtered_df.columns:
+        dept_counts = filtered_df["libelle_de_departement_tutelle_gestionnaire"].value_counts().reset_index()
+        dept_counts.columns = ["departement", "nb_projets"]
 
-    @st.cache_data
-    def geocode_departement(dep):
-        try:
-            location = geolocator.geocode(dep + ", France")
-            if location:
-                return pd.Series([location.latitude, location.longitude])
-        except:
-            pass
-        return pd.Series([None, None])
+        geolocator = Nominatim(user_agent="anr_dashboard_v1")
 
-    dept_counts[['lat', 'lon']] = dept_counts['departement'].apply(geocode_departement)
+        @st.cache_data
+        def geocode_departement(dep):
+            try:
+                location = geolocator.geocode(dep + ", France")
+                if location:
+                    return pd.Series([location.latitude, location.longitude])
+            except:
+                pass
+            return pd.Series([None, None])
 
-    # Nettoyer les lignes sans géocode
-    dept_counts = dept_counts.dropna(subset=["lat", "lon"])
+        dept_counts[['lat', 'lon']] = dept_counts['departement'].apply(geocode_departement)
+        dept_counts = dept_counts.dropna(subset=["lat", "lon"])
 
-    # Afficher la carte
-    fig = px.scatter_mapbox(
-        dept_counts,
-        lat="lat",
-        lon="lon",
-        size="nb_projets",
-        hover_name="departement",
-        zoom=5,
-        mapbox_style="open-street-map",
-        title="Répartition géographique des projets ANR par département"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Colonne 'libelle_de_departement_tutelle_gestionnaire' non trouvée dans la base.")
-    # 📋 Tableau final
+        fig_map = px.scatter_mapbox(
+            dept_counts,
+            lat="lat",
+            lon="lon",
+            size="nb_projets",
+            hover_name="departement",
+            zoom=5,
+            mapbox_style="open-street-map",
+            title="Répartition géographique des projets ANR par département"
+        )
+        st.plotly_chart(fig_map, use_container_width=True)
+    else:
+        st.info("Colonne 'libelle_de_departement_tutelle_gestionnaire' non trouvée dans la base.")
+
+    # 📋 Tableau des données filtrées
     st.subheader("📋 Données filtrées")
     st.dataframe(filtered_df)
 
