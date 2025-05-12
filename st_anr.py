@@ -10,9 +10,19 @@ st.title("📊 Tableau de bord des projets financés par l'ANR 2014-2024")
 st.caption("⚠️ L’application peut prendre 2 à 3 minutes à charger. Merci de patienter 🙏")
 
 # Chargement des données
+t.sidebar.markdown("## 📂 Choix de la base")
+source_choice = st.sidebar.radio(
+    "Sélection de la base de données à analyser :",
+    ["📘 ANR Global", "🔗 Croisement ANR/CORDIS"]
+)
+
+# Fonction pour charger les données en fonction du choix
 @st.cache_data
-def load_data():
-    df = pd.read_excel("base18042025.xlsx")
+def load_data(source):
+    if source == "📘 ANR Global":
+        df = pd.read_excel("base18042025.xlsx")
+    else:
+        df = pd.read_excel("croisement_anr_cordis.xlsx")  # Remplace par le vrai nom
 
     # 🔐 Patch anti-pyarrow : convertir toutes les colonnes objets en str
     obj_cols = df.select_dtypes(include="object").columns
@@ -20,7 +30,7 @@ def load_data():
 
     return df
 
-df = load_data()
+df = load_data(source_choice)
 
 # Nettoyage des données numériques
 num_cols = ["aide_allouee_projet_keuros", "aide_allouee_partenaire", "aide_demandee_partenaire"]
