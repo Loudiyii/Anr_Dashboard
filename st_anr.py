@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from geopy.geocoders import Nominatim
 
 st.set_page_config(layout="wide")
 st.title("📊 Tableau de bord des projets financés par l'ANR 2014-2024")
@@ -156,7 +157,45 @@ if "code_projet_anr" in filtered_reference.columns and "code_partenaire_anr" in 
         pie_inst.columns = ["Instrument", "Nombre"]
         fig_inst = px.pie(pie_inst, names="Instrument", values="Nombre", title="Instruments de financement")
         st.plotly_chart(fig_inst, use_container_width=True)
+st.subheader("🗺️ Carte des projets par département (tutelle gestionnaire)")
 
+if "libelle_de_departement_tutelle_gestionnaire" in filtered_df.columns:
+    # Compter les projets par département
+    dept_counts = filtered_df["libelle_de_departement_tutelle_gestionnaire"].value_counts().reset_index()
+    dept_counts.columns = ["departement", "nb_projets"]
+
+    # Géocoder les départements
+    geolocator = Nominatim(user_agent="anr_dashboard_v1")
+
+    @st.cache_data
+    def geocode_departement(dep):
+        try:
+            location = geolocator.geocode(dep + ", France")
+            if location:
+                return pd.Series([location.latitude, location.longitude])
+        except:
+            pass
+        return pd.Series([None, None])
+
+    dept_counts[['lat', 'lon']] = dept_counts['departement'].apply(geocode_departement)
+
+    # Nettoyer les lignes sans géocode
+    dept_counts = dept_counts.dropna(subset=["lat", "lon"])
+
+    # Afficher la carte
+    fig = px.scatter_mapbox(
+        dept_counts,
+        lat="lat",
+        lon="lon",
+        size="nb_projets",
+        hover_name="departement",
+        zoom=5,
+        mapbox_style="open-street-map",
+        title="Répartition géographique des projets ANR par département"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("Colonne 'libelle_de_departement_tutelle_gestionnaire' non trouvée dans la base.")
     # 📋 Tableau final
     st.subheader("📋 Données filtrées")
     st.dataframe(filtered_df)
