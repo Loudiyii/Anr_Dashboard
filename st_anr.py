@@ -21,6 +21,7 @@ def load_data(source):
         df = pd.read_excel("base18042025.xlsx")
     else:
         df = pd.read_excel("ANR_projets_communs.xlsx")  # Remplace par le vrai nom
+    df.columns = df.columns.str.strip().str.lower()
 
     # 🔐 Patch conversion string
     obj_cols = df.select_dtypes(include="object").columns
