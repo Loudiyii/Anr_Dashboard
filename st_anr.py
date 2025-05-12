@@ -10,7 +10,7 @@ st.title("📊 Tableau de bord des projets financés par l'ANR 2014-2024")
 st.caption("⚠️ L’application peut prendre 2 à 3 minutes à charger. Merci de patienter 🙏")
 
 # Chargement des données
-t.sidebar.markdown("## 📂 Choix de la base")
+st.sidebar.markdown("## 📂 Choix de la base")
 source_choice = st.sidebar.radio(
     "Sélection de la base de données à analyser :",
     ["📘 ANR Global", "🔗 Croisement ANR/CORDIS"]
