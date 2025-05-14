@@ -134,9 +134,9 @@ if {"code_projet_anr", "code_partenaire_anr"}.issubset(filtered_reference.column
         st.plotly_chart(fig_inst, use_container_width=True)
 
     # 🗺️ Carte
-    if {"lat", "long", "city", "code_projet_anr"}.issubset(filtered_df.columns):
+    if {"latitude", "longitude"}.issubset(filtered_df.columns):
         st.subheader("📍 Carte des lieux avec le plus de projets")
-        df_map = filtered_df.groupby(['lat', 'long', 'city'], as_index=False).agg(nb_projets=('code_projet_anr', 'nunique')).dropna()
+        df_map = filtered_df.groupby(['latitude', 'longitude', 'city'], as_index=False).agg(nb_projets=('code_projet_anr', 'nunique')).dropna()
         fig_map = px.scatter_mapbox(
             df_map,
             lat='lat',
