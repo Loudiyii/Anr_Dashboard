@@ -155,41 +155,12 @@ if "code_projet_anr" in filtered_reference.columns and "code_partenaire_anr" in 
         fig_inst = px.pie(pie_inst, names="Instrument", values="Nombre", title="Instruments de financement")
         st.plotly_chart(fig_inst, use_container_width=True)
 
-    # 🗺️ Carte géographique
-    st.subheader("🗺️ Carte des projets par département (tutelle gestionnaire)")
-
-    if "libelle_de_departement_tutelle_gestionnaire" in filtered_df.columns:
-        dept_counts = filtered_df["libelle_de_departement_tutelle_gestionnaire"].value_counts().reset_index()
-        dept_counts.columns = ["departement", "nb_projets"]
-
-        geolocator = Nominatim(user_agent="anr_dashboard_v1")
-
-        @st.cache_data
-        def geocode_departement(dep):
-            try:
-                location = geolocator.geocode(dep + ", France")
-                if location:
-                    return pd.Series([location.latitude, location.longitude])
-            except:
-                pass
-            return pd.Series([None, None])
-
-        dept_counts[['lat', 'lon']] = dept_counts['departement'].apply(geocode_departement)
-        dept_counts = dept_counts.dropna(subset=["lat", "lon"])
-
-        fig_map = px.scatter_mapbox(
-            dept_counts,
-            lat="lat",
-            lon="lon",
-            size="nb_projets",
-            hover_name="departement",
-            zoom=5,
-            mapbox_style="open-street-map",
-            title="Répartition géographique des projets ANR par département"
-        )
-        st.plotly_chart(fig_map, use_container_width=True)
-    else:
-        st.info("Colonne 'libelle_de_departement_tutelle_gestionnaire' non trouvée dans la base.")
+    if 'lat' in filtered_df.columns and 'long' in filtered_df.columns:
+    st.subheader("📍 Carte des lieux avec le plus de projets")
+    df_map = filtered_df.groupby(['lat', 'long', 'city'], as_index=False).agg(nb_projets=('id', 'nunique')).dropna()
+    fig_map = px.scatter_mapbox(df_map, lat='lat', lon='long', size='nb_projets', color='nb_projets', color_continuous_scale='Viridis', zoom=4, height=600, title="Nombre de projets par localisation", hover_name='city')
+    fig_map.update_layout(mapbox_style="open-street-map")
+    st.plotly_chart(fig_map, use_container_width=True)
 
     # 📋 Tableau des données filtrées
     st.subheader("📋 Données filtrées")
