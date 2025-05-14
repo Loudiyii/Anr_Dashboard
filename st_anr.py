@@ -135,22 +135,27 @@ if {"code_projet_anr", "code_partenaire_anr"}.issubset(filtered_reference.column
 
     # 🗺️ Carte
     if {"latitude", "longitude"}.issubset(filtered_df.columns):
-        st.subheader("📍 Carte des lieux avec le plus de projets")
-        df_map = filtered_df.groupby(['latitude', 'longitude', 'city'], as_index=False).agg(nb_projets=('code_projet_anr', 'nunique')).dropna()
-        fig_map = px.scatter_mapbox(
-            df_map,
-            lat='lat',
-            lon='long',
-            size='nb_projets',
-            color='nb_projets',
-            color_continuous_scale='Viridis',
-            zoom=4,
-            height=600,
-            title="Nombre de projets par localisation",
-            hover_name='city'
-        )
-        fig_map.update_layout(mapbox_style="open-street-map")
-        st.plotly_chart(fig_map, use_container_width=True)
+    st.subheader("📍 Carte des lieux avec le plus de projets")
+
+    # Pour éviter les doublons (ex. plusieurs partenaires au même endroit)
+    df_map = filtered_df.drop_duplicates(subset=["code_projet_anr", "latitude", "longitude"])
+    
+    # Création du champ popup si besoin
+    df_map["hover_text"] = df_map["nom_tutelle_gestionnaire"].fillna("Inconnu")
+
+    fig_map = px.scatter_mapbox(
+        df_map,
+        lat="latitude",
+        lon="longitude",
+        size_max=15,
+        zoom=4,
+        color_discrete_sequence=["blue"],
+        height=600,
+        title="Localisation des projets financés",
+        hover_name="hover_text"
+    )
+    fig_map.update_layout(mapbox_style="open-street-map")
+    st.plotly_chart(fig_map, use_container_width=True)
 
     # 📋 Données filtrées
     st.subheader("📋 Données filtrées")
