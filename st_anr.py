@@ -156,12 +156,7 @@ if {"code_projet_anr", "code_partenaire_anr"}.issubset(filtered_reference.column
         )
         fig_map.update_layout(mapbox_style="open-street-map")
         st.plotly_chart(fig_map, use_container_width=True)
-        if 'lat' in df.columns and 'long' in df.columns:
-            st.subheader("📍 Carte des lieux avec le plus de projets")
-            df_map = df.groupby(['latitude', 'longitude'], as_index=False).agg(nb_projets=('code_projet_anr', 'nunique')).dropna()
-            fig_map = px.scatter_mapbox(df_map, lat='lat', lon='long', size='nb_projets', color='nb_projets', color_continuous_scale='Viridis', zoom=4, height=600, title="Nombre de projets par localisation", hover_name='city')
-            fig_map.update_layout(mapbox_style="open-street-map")
-            st.plotly_chart(fig_map, use_container_width=True)
+     
 
     # 📋 Données filtrées
     st.subheader("📋 Données filtrées")
