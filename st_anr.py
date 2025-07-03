@@ -18,7 +18,7 @@ source_choice = st.sidebar.radio(
 @st.cache_data
 def load_data(source):
     if source == "📘 ANR Global":
-        df = pd.read_excel("base_enrichie_finale.xlsx")
+        df = pd.read_excel("base18042025_enrichie.xlsx")
     else:
         df = pd.read_excel("ANR_projets_communs_enrichi.xlsx")
     df.columns = df.columns.str.strip().str.lower()
